@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Task Board | Assignment 2</title>
+
+    <!-- This line provides automatic page and style reloading when files change -->
+    <script type="module" src="/lib/client/updater.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles2.css">
+    <script type="module" src="index.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>Task Board</h1>
+      <form id="addCard">
+        <input type="text" name="title" id="cardTitle" placeholder="Title" required>
+        <input type="text" name="color" id="cardColor" placeholder="Color">
+        <button type="submit" id="addButton">Add</button>
+      </form>
+    </header>
+
+    <main id="board">
+      <section class="column" id="todo">
+        <h2 class="columnTitle">To Do</h2>
+      </section>
+
+      <section class="column" id="doing">
+        <h2 class="columnTitle">Doing</h2>
+      </section>
+
+      <section class="column" id="done">
+        <h2 class="columnTitle">Done</h2>
+      </section>
+    </main>
+
+    <!-- Template card to be cloned in JavaScript -->
+    <article class="template card">
+      <h3 class="title">[TEMPLATE]</h3>
+      <p class="description">You should never see this text.</p>
+      <textarea class="editDescription hidden"></textarea>
+      <div class="buttons">
+        <button class="edit"><img src="icons/edit.svg" alt="Edit"></button>
+        <button class="startMove"><img src="icons/move.svg" alt="Move"></button>
+        <button class="delete"><img src="icons/delete.svg" alt="Delete"></button>
+      </div>
+    </article>
+  </body>
+</html>

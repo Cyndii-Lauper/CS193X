@@ -1,0 +1,28 @@
+{
+  "name": "@cs193x/assign0",
+  "version": "2023.spr",
+  "description": "CS193X Assignment 0",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.22",
+    "socket.io": "^4.6.1"
+  },
+  "scripts": {
+    "start": "nodemon"
+  },
+  "nodemonConfig": {
+    "signal": "SIGTERM",
+    "watch": [
+      "api",
+      "lib",
+      "server.js"
+    ]
+  }
+}

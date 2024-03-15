@@ -1,0 +1,90 @@
+:root {
+    font-family:sans-serif;
+}
+
+body {
+    margin:0;
+    height: 100vh;
+}
+
+header {
+    background-color: #202020;
+    color:white;
+    position: relative;
+    height:3rem;
+}
+
+h1 {
+    position: absolute;
+    left:0;
+    top:0.5rem;
+    bottom:0.5rem;
+    display:inline-block;
+    font-size:x-large;
+    margin:0;
+    margin-left:5rem;
+}
+
+#addCard {
+    position: absolute;
+    right:0;
+    top:0.7rem;
+    bottom:0.5rem;
+    display:inline-block;
+    margin-right:5rem;
+}
+
+#cardTitle {
+    width:20em;
+}
+
+#cardColor {
+    width:8em;
+}
+
+#addButton {
+    background-color: lightgreen;
+    color:black;
+}
+
+main {
+    height:100%;
+    margin-left:5rem;
+    margin-right:5rem;
+    display:flex;
+    flex-direction: raw;
+}
+
+.column {
+    flex:1;
+    padding-left:0.5rem;
+    padding-right:0.5rem;
+    padding-bottom:3rem;
+}
+
+.columnTitle {
+    margin-top:1rem;
+    margin-left:1rem;
+    margin-right:1rem;
+}
+
+#todo {
+    background-color: #f0f0f0;
+}
+
+#doing {
+    background-color: white;
+}
+
+#done {
+    background-color: #f0f0f0;
+}
+
+.card {
+    margin-top:0.5rem;
+    margin-bottom:0.5rem;
+    border-radius: 0.5rem;
+    
+}
+
+

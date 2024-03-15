@@ -1,0 +1,52 @@
+:root {
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+.template, .hidden {
+  display: none;
+}
+
+input, button, textarea{
+  font-size:16px;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.moving {
+  border:2px solid black;
+}
+
+.editDescription {
+  height:80px;
+  width:100%;
+}
+
+.description {
+  white-space: pre;
+}
+
+.buttons .edit, .buttons .startMove, .buttons .delete {
+  background-color: inherit;
+  border-width: 0;
+  cursor: pointer;
+}
+
+.buttons .edit:hover, .buttons .startMove:hover, .buttons .delete:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.moveHere {
+  background:transparent;
+  font-size:small;
+  color: gray;
+  cursor: pointer;;
+  border-width: 0;
+}
+
+.moveHere:hover {
+  background-color: #e0e0e0;
+  color:black;
+}

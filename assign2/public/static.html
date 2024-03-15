@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Task Board (Static) | Assignment 2</title>
+
+    <!-- This line provides automatic page and style reloading when files change -->
+    <script type="module" src="/lib/client/updater.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles2.css">
+  </head>
+  <body>
+    <header>
+      <h1>Task Board</h1>
+
+      <form id="addCard">
+        <input type="text" name="title" id="cardTitle" placeholder="Title" required>
+        <input type="text" name="color" id="cardColor" placeholder="Color">
+        <button type="submit" id="addButton">Add</button>
+      </form>
+    </header>
+
+    <main id="board">
+      <section class="column" id="todo">
+        <h2 class="columnTitle">To Do</h2>
+        <article class="card" style="background-color: lightblue">
+          <h3 class="title">Card and buttons</h3>
+          <p class="description">Button hovering is a bit tricky.
+
+Wanted to add a drop shadow but couldn't figure out all the numbers...</p>
+          <textarea class="editDescription hidden"></textarea>
+          <div class="buttons">
+            <button class="edit"><img src="icons/edit.svg" alt="Edit"></button>
+            <button class="startMove"><img src="icons/move.svg" alt="Move"></button>
+            <button class="delete"><img src="icons/delete.svg" alt="Delete"></button>
+          </div>
+        </article>
+
+        <article class="card" style="background-color: #c0c0ff">
+          <h3 class="title">Profit???</h3>
+          <p class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          <textarea class="editDescription hidden"></textarea>
+          <div class="buttons">
+            <button class="edit"><img src="icons/edit.svg" alt="Edit"></button>
+            <button class="startMove"><img src="icons/move.svg" alt="Move"></button>
+            <button class="delete"><img src="icons/delete.svg" alt="Delete"></button>
+          </div>
+        </article>
+      </section>
+
+      <section class="column" id="doing">
+        <h2 class="columnTitle">Doing</h2>
+        <article class="card" style="background-color: khaki">
+          <h3 class="title">Board and columns</h3>
+          <p class="description">(No description)</p>
+          <textarea class="editDescription hidden"></textarea>
+          <div class="buttons">
+            <button class="edit"><img src="icons/edit.svg" alt="Edit"></button>
+            <button class="startMove"><img src="icons/move.svg" alt="Move"></button>
+            <button class="delete"><img src="icons/delete.svg" alt="Delete"></button>
+          </div>
+        </article>
+      </section>
+
+      <section class="column" id="done">
+        <h2 class="columnTitle">Done</h2>
+        <button class="moveHere">— Move here —</button>
+        <article class="card moving" style="background-color: pink">
+          <h3 class="title">Style the top bar</h3>
+          <p class="description">Left/right layout
+  Heading font
+  Add card form</p>
+          <textarea class="editDescription hidden"></textarea>
+          <div class="buttons">
+            <button class="edit"><img src="icons/edit.svg" alt="Edit"></button>
+            <button class="startMove"><img src="icons/move.svg" alt="Move"></button>
+            <button class="delete"><img src="icons/delete.svg" alt="Delete"></button>
+          </div>
+        </article>
+        <button class="moveHere">— Move here —</button>
+      </section>
+    </main>
+
+    <!-- Template card to be cloned in JavaScript -->
+    <article class="template card">
+      <h3 class="title">[TEMPLATE]</h3>
+      <p class="description">You should never see this text.</p>
+      <textarea class="editDescription hidden"></textarea>
+      <div class="buttons">
+        <button class="edit"><img src="icons/edit.svg" alt="Edit"></button>
+        <button class="startMove"><img src="icons/move.svg" alt="Move"></button>
+        <button class="delete"><img src="icons/delete.svg" alt="Delete"></button>
+      </div>
+    </article>
+  </body>
+</html>
