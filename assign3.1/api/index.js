@@ -115,17 +115,70 @@ api.post("/users", (req, res) => {
   res.status(200).json(newUser);
 });
 
-// GET: Lấy thông tin về các bài đăng của người dùng với ID
+// Endpoint GET để lấy feed của người dùng
 api.get("/users/:id/posts", (req, res) => {
-  // Trả về danh sách các bài đăng từ những người mà người dùng đang theo dõi
-  res.json({ posts: posts });
+  const userId = req.params.id; // Lấy ID của người dùng từ URL
+
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
+  const userIndex = users.findIndex((user) => user.id === userId);
+
+  // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
+  if (userIndex === -1) {
+    return res.status(404).json({ error: `No user with ID ${userId}` });
+  }
+
+  // Lấy danh sách người dùng mà người dùng hiện tại đang theo dõi
+  const followingList = users[userIndex].following;
+
+  // Tạo mảng để lưu trữ feed của người dùng
+  let userFeed = [];
+
+  // Thêm bài đăng của người dùng hiện tại vào feed
+  userFeed.push(
+    ...users[userIndex].posts.map((post) => ({
+      user: {
+        id: userId,
+        name: users[userIndex].name,
+        avatarURL: users[userIndex].avatarURL,
+      },
+      time: post.time,
+      text: post.text,
+    })),
+  );
+
+  // Lặp qua từng người dùng mà người dùng hiện tại đang theo dõi
+  followingList.forEach((followingId) => {
+    // Tìm kiếm người dùng được theo dõi trong danh sách users
+    const followingUserIndex = users.findIndex(
+      (user) => user.id === followingId,
+    );
+    // Nếu người dùng được theo dõi tồn tại
+    if (followingUserIndex !== -1) {
+      // Thêm các bài đăng của người dùng được theo dõi vào feed
+      userFeed.push(
+        ...users[followingUserIndex].posts.map((post) => ({
+          user: {
+            id: followingId,
+            name: users[followingUserIndex].name,
+            avatarURL: users[followingUserIndex].avatarURL,
+          },
+          time: post.time,
+          text: post.text,
+        })),
+      );
+    }
+  });
+
+  // Sắp xếp các bài đăng trong feed theo thời gian giảm dần (mới nhất trước)
+  userFeed.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  // Trả về feed của người dùng
+  res.json({ posts: userFeed });
 });
 
-const posts = [];
-
-// Phương thức POST để thêm một bài đăng mới cho người dùng với ID
+// Phương thức POST để tạo một bài đăng mới
 api.post("/users/:id/posts", (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params.id; // Lấy ID của người dùng từ URL
   const { text } = req.body; // Lấy nội dung bài viết từ body của yêu cầu
 
   // Kiểm tra xem nội dung bài viết đã được cung cấp hay không
@@ -134,33 +187,35 @@ api.post("/users/:id/posts", (req, res) => {
   }
 
   // Tìm kiếm người dùng với ID tương ứng trong danh sách users
-  const user = users.find((user) => user.id === userId);
+  const userIndex = users.findIndex((user) => user.id === userId);
 
   // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
-  if (user === -1) {
+  if (userIndex === -1) {
     return res.status(404).json({ error: `No user with ID ${userId}` });
+  }
+
+  // Kiểm tra xem mảng `posts` của người dùng đã được khởi tạo chưa
+  if (!users[userIndex].posts) {
+    // Nếu chưa, khởi tạo mảng `posts`
+    users[userIndex].posts = [];
   }
 
   // Tạo một bài đăng mới
   const newPost = {
     user: {
-      id: user.id,
-      name: user.name,
-      avatarURL: user.avatarURL,
+      id: userId,
+      name: users[userIndex].name, // Lấy tên người dùng từ danh sách users
+      avatarURL: users[userIndex].avatarURL, // Lấy URL avatar của người dùng từ danh sách users
     },
-    time: new Date(),
+    time: new Date(), // Thời gian hiện tại
     text: text,
   };
 
-  // Thêm bài đăng mới vào mảng posts
-  posts.push(newPost);
+  // Thêm bài đăng mới vào mảng posts của người dùng
+  users[userIndex].posts.push(newPost);
 
-  // Trả về phản hồi thành công và bài đăng mới được tạo
-  res.status(201).json({
-    success: true,
-    message: "Post created successfully",
-    post: newPost,
-  });
+  // Trả về phản hồi thành công
+  res.status(200).json({ success: true });
 });
 
 // Endpoint POST để người dùng theo dõi người dùng mục tiêu
@@ -205,6 +260,53 @@ api.post("/users/:id/follow", (req, res) => {
 
   // Trả về phản hồi thành công
   res.json({ success: true });
+});
+
+// Phương thức DELETE để ngừng theo dõi người dùng mục tiêu
+api.delete("/users/:id/follow", (req, res) => {
+  const userId = req.params.id; // Lấy ID của người dùng từ URL
+  const targetId = req.query.target; // Lấy ID của người dùng mục tiêu từ query string
+
+  // Kiểm tra xem query string có chứa thuộc tính target hay không
+  if (!targetId) {
+    return res
+      .status(400)
+      .json({ error: "Query string is missing a target property" });
+  }
+
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
+  const userIndex = users.findIndex((user) => user.id === userId);
+
+  // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
+  if (userIndex === -1) {
+    return res.status(404).json({ error: `No user with ID ${userId}` });
+  }
+
+  // Tìm kiếm người dùng mục tiêu trong danh sách users
+  const targetUserIndex = users.findIndex((user) => user.id === targetId);
+
+  // Nếu không tìm thấy người dùng mục tiêu, trả về mã lỗi 404 và thông báo lỗi
+  if (targetUserIndex === -1) {
+    return res.status(404).json({ error: `No user with ID ${targetId}` });
+  }
+
+  // Kiểm tra xem người dùng đang theo dõi người dùng mục tiêu không
+  const isFollowing = users[userIndex].following.includes(targetId);
+
+  // Nếu người dùng không theo dõi người dùng mục tiêu, trả về mã lỗi 400 và thông báo lỗi
+  if (!isFollowing) {
+    return res
+      .status(400)
+      .json({ error: `${userId} is not following ${targetId}` });
+  }
+
+  // Xóa người dùng mục tiêu khỏi danh sách người dùng đang theo dõi của người dùng
+  users[userIndex].following = users[userIndex].following.filter(
+    (id) => id !== targetId,
+  );
+
+  // Trả về phản hồi thành công
+  res.status(200).json({ success: true });
 });
 
 /* This is a catch-all route that logs any requests that weren't handled above.
