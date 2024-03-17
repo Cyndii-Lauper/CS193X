@@ -34,7 +34,7 @@ export default class App {
 
   async _onListUsers() {
     let users = await User.listUsers();
-    let usersStr = users.map((user) => JSON.stringify(user)).join("\n");
+    let usersStr = users.join("\n");
     alert(`List of users:\n\n${usersStr}`);
   }
 

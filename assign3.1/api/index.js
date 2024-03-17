@@ -38,8 +38,11 @@ api.all("/tests/echo", (req, res) => {
 
 // Phương thức GET để lấy danh sách tất cả người dùng
 api.get("/users", (req, res) => {
-  // Trả về danh sách tất cả người dùng
-  res.json({ users });
+  // Lặp qua danh sách các người dùng và tạo một mảng mới chỉ chứa các ID của họ
+  const userIds = users.map((user) => user.id);
+
+  // Trả về danh sách ID của tất cả người dùng dưới dạng JSON
+  res.json({ users: userIds });
 });
 
 // api.get("/users/mchang", (req, res) => {
@@ -51,97 +54,105 @@ api.get("/users", (req, res) => {
 //   });
 // });
 
-// Phương thức GET để lấy thông tin của một người dùng dựa vào ID
+// Tạo một phương thức GET để lấy hồ sơ của một người dùng dựa trên ID
 api.get("/users/:id", (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params.id; // Lấy ID của người dùng từ URL
 
-  // Tìm người dùng trong mảng users dựa trên userId
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
   const user = users.find((user) => user.id === userId);
 
-  if (user) {
-    // Nếu người dùng được tìm thấy, trả về thông tin của người dùng
-    res.json({ user });
-  } else {
-    // Nếu không tìm thấy người dùng, trả về một lỗi 404 (Not Found)
-    res.status(404).json({ error: "User not found" });
+  // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
+  if (!user) {
+    return res.status(404).json({ error: `No user with ID ${userId}` });
   }
+
+  // Nếu tìm thấy người dùng, trả về thông tin của người dùng
+  res.json({
+    id: user.id,
+    name: user.name,
+    avatarURL: user.avatarURL,
+    following: user.following,
+  });
 });
 
+// Là một mảng lưu trữ thông tin của tất cả người dùng
 const users = [];
 
-// Phương thức POST để tạo một người dùng mới
-api.post("/users", (req, res) => {
-  const { id, name, avatarURL, following } = req.body;
+// Hàm để tìm kiếm người dùng theo ID
+const getUserById = (userId) => {
+  return users.find((user) => user.id === userId);
+};
 
-  // Kiểm tra xem các trường thông tin cần thiết có được cung cấp hay không
-  if (!id || !name || !avatarURL) {
-    return res.status(400).json({ error: "All fields are required" });
+api.post("/users", (req, res) => {
+  // Kiểm tra xem request body có thuộc tính "id" không và giá trị của "id" không rỗng
+  if (!req.body.id || req.body.id.trim() === "") {
+    return res.status(400).json({ error: "ID is missing or empty" });
   }
 
-  // Kiểm tra xem người dùng đã tồn tại hay chưa
-  const existingUser = users.find((user) => user.id === id);
-  if (existingUser) {
-    return res.status(400).json({ error: "User ID already exists" });
+  const userId = req.body.id;
+  const userName = req.body.name;
+  const userAvatar = req.body.avatarURL;
+  const userFollowing = req.body.following;
+
+  // Kiểm tra xem người dùng đã tồn tại chưa
+  if (getUserById(userId)) {
+    return res.status(400).json({ error: "User already exists" });
   }
 
   // Tạo một người dùng mới
   const newUser = {
-    id,
-    name,
-    avatarURL,
-    following,
+    id: userId,
+    name: userName,
+    avatarURL: userAvatar || "images/default.png", // Sử dụng ảnh mặc định nếu không có URL ảnh được cung cấp
+    following: userFollowing || [], // Sử dụng mảng trống nếu không có người dùng được theo dõi
   };
 
-  // Thêm người dùng mới vào mảng users
+  // Thêm người dùng mới vào danh sách người dùng
   users.push(newUser);
 
-  // Trả về phản hồi thành công và người dùng mới đã được tạo
-  res.status(201).json({
-    success: true,
-    message: "User created successfully",
-    user: newUser,
-  });
+  // Trả về dữ liệu của người dùng mới tạo
+  res.status(200).json(newUser);
 });
 
-const posts = [];
+// const posts = [];
 
-// GET: Lấy thông tin về các bài đăng của người dùng mchang
-api.get("/users/mchang/posts", (req, res) => {
-  // Giả sử 'posts' là một mảng chứa các bài đăng của người dùng mchang
-  res.json({ posts: posts });
-});
+// // GET: Lấy thông tin về các bài đăng của người dùng mchang
+// api.get("/users/mchang/posts", (req, res) => {
+//   // Giả sử 'posts' là một mảng chứa các bài đăng của người dùng mchang
+//   res.json({ posts: posts });
+// });
 
-// POST: Thêm một bài đăng mới cho người dùng mchang
-// Phương thức POST để thêm một bài đăng mới cho người dùng có ID là "mchang"
-api.post("/users/mchang/posts", (req, res) => {
-  const text = req.body.text;
+// // POST: Thêm một bài đăng mới cho người dùng mchang
+// // Phương thức POST để thêm một bài đăng mới cho người dùng có ID là "mchang"
+// api.post("/users/mchang/posts", (req, res) => {
+//   const text = req.body.text;
 
-  // Kiểm tra xem dữ liệu có hợp lệ không
-  if (!text) {
-    return res.status(400).json({ error: "Text for post is required" });
-  }
+//   // Kiểm tra xem dữ liệu có hợp lệ không
+//   if (!text) {
+//     return res.status(400).json({ error: "Text for post is required" });
+//   }
 
-  // Tạo một bài đăng mới
-  const newPost = {
-    user: {
-      id: "mchang",
-      name: "Michael",
-      avatarURL: "images/stanford.png",
-    },
-    time: new Date(),
-    text: text,
-  };
+//   // Tạo một bài đăng mới
+//   const newPost = {
+//     user: {
+//       id: "mchang",
+//       name: "Michael",
+//       avatarURL: "images/stanford.png",
+//     },
+//     time: new Date(),
+//     text: text,
+//   };
 
-  // Thêm bài đăng mới vào mảng posts
-  posts.push(newPost);
+//   // Thêm bài đăng mới vào mảng posts
+//   posts.push(newPost);
 
-  // Trả về phản hồi thành công và bài đăng mới được tạo
-  res.status(201).json({
-    success: true,
-    message: "Post created successfully",
-    post: newPost,
-  });
-});
+//   // Trả về phản hồi thành công và bài đăng mới được tạo
+//   res.status(201).json({
+//     success: true,
+//     message: "Post created successfully",
+//     post: newPost,
+//   });
+// });
 
 /* This is a catch-all route that logs any requests that weren't handled above.
    Useful for seeing whether other requests are coming through correctly */

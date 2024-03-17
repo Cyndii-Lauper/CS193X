@@ -17,7 +17,7 @@ export default class User {
   static async listUsers() {
     let data = await apiRequest("GET", "/users");
     console.log(data);
-    return data.users.map((user) => user.id);
+    return data.users;
   }
 
   /* Returns a User instance, creating the user if necessary. */

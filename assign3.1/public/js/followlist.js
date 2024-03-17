@@ -19,6 +19,12 @@ export default class FollowList {
 
   /* Set the list of user IDs to display. users is an Array of strings. */
   setList(users) {
+    // Kiểm tra xem users có phải là một mảng hay không
+    if (!Array.isArray(users)) {
+      console.error("Error: 'users' is not an array.");
+      return;
+    }
+
     this._list.textContent = "";
     for (let user of users) {
       let li = document.createElement("li");
