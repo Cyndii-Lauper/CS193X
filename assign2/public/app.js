@@ -14,7 +14,7 @@ export default class App {
         alert("you should give the cardTitle");
         return;
       }
-      this.addCard("todo", title, color);//DOM对象引用了this(app)
+      this.addCard("todo", title, color); 
       cardTitle.value = null;
       cardColor.value = null;
     });
