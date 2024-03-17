@@ -186,7 +186,7 @@ api.post("/users/:id/posts", (req, res) => {
     return res.status(400).json({ error: "Text property is missing or empty" });
   }
 
-  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users 
   const userIndex = users.findIndex((user) => user.id === userId);
 
   // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
@@ -323,3 +323,5 @@ api.all("/*", (req, res) => {
 });
 
 export default initApi;
+
+// Minh
