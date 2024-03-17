@@ -36,7 +36,7 @@ api.all("/tests/echo", (req, res) => {
   });
 });
 
-// Phương thức GET để lấy danh sách tất cả người dùng
+// Phương thức GET để lấy danh sách tất cả ID của người dùng
 api.get("/users", (req, res) => {
   // Lặp qua danh sách các người dùng và tạo một mảng mới chỉ chứa các ID của họ
   const userIds = users.map((user) => user.id);
@@ -89,6 +89,7 @@ api.post("/users", (req, res) => {
     return res.status(400).json({ error: "ID is missing or empty" });
   }
 
+  // Trích xuất thông tin về người dùng từ dữ liệu gửi từ phía client
   const userId = req.body.id;
   const userName = req.body.name;
   const userAvatar = req.body.avatarURL;
@@ -114,45 +115,97 @@ api.post("/users", (req, res) => {
   res.status(200).json(newUser);
 });
 
-// const posts = [];
+// GET: Lấy thông tin về các bài đăng của người dùng với ID
+api.get("/users/:id/posts", (req, res) => {
+  // Trả về danh sách các bài đăng từ những người mà người dùng đang theo dõi
+  res.json({ posts: posts });
+});
 
-// // GET: Lấy thông tin về các bài đăng của người dùng mchang
-// api.get("/users/mchang/posts", (req, res) => {
-//   // Giả sử 'posts' là một mảng chứa các bài đăng của người dùng mchang
-//   res.json({ posts: posts });
-// });
+const posts = [];
 
-// // POST: Thêm một bài đăng mới cho người dùng mchang
-// // Phương thức POST để thêm một bài đăng mới cho người dùng có ID là "mchang"
-// api.post("/users/mchang/posts", (req, res) => {
-//   const text = req.body.text;
+// Phương thức POST để thêm một bài đăng mới cho người dùng với ID
+api.post("/users/:id/posts", (req, res) => {
+  const userId = req.params.id;
+  const { text } = req.body; // Lấy nội dung bài viết từ body của yêu cầu
 
-//   // Kiểm tra xem dữ liệu có hợp lệ không
-//   if (!text) {
-//     return res.status(400).json({ error: "Text for post is required" });
-//   }
+  // Kiểm tra xem nội dung bài viết đã được cung cấp hay không
+  if (!text) {
+    return res.status(400).json({ error: "Text property is missing or empty" });
+  }
 
-//   // Tạo một bài đăng mới
-//   const newPost = {
-//     user: {
-//       id: "mchang",
-//       name: "Michael",
-//       avatarURL: "images/stanford.png",
-//     },
-//     time: new Date(),
-//     text: text,
-//   };
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
+  const user = users.find((user) => user.id === userId);
 
-//   // Thêm bài đăng mới vào mảng posts
-//   posts.push(newPost);
+  // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
+  if (user === -1) {
+    return res.status(404).json({ error: `No user with ID ${userId}` });
+  }
 
-//   // Trả về phản hồi thành công và bài đăng mới được tạo
-//   res.status(201).json({
-//     success: true,
-//     message: "Post created successfully",
-//     post: newPost,
-//   });
-// });
+  // Tạo một bài đăng mới
+  const newPost = {
+    user: {
+      id: user.id,
+      name: user.name,
+      avatarURL: user.avatarURL,
+    },
+    time: new Date(),
+    text: text,
+  };
+
+  // Thêm bài đăng mới vào mảng posts
+  posts.push(newPost);
+
+  // Trả về phản hồi thành công và bài đăng mới được tạo
+  res.status(201).json({
+    success: true,
+    message: "Post created successfully",
+    post: newPost,
+  });
+});
+
+// Endpoint POST để người dùng theo dõi người dùng mục tiêu
+api.post("/users/:id/follow", (req, res) => {
+  const userId = req.params.id; // Lấy ID của người dùng từ URL
+  const targetId = req.query.target; // Lấy ID của người dùng mục tiêu từ query string
+
+  // Kiểm tra xem targetId đã được cung cấp hay không
+  if (!targetId) {
+    return res
+      .status(400)
+      .json({ error: "Target property is missing or empty" });
+  }
+
+  // Tìm kiếm người dùng và người dùng mục tiêu trong danh sách users
+  const user = users.find((user) => user.id === userId);
+  const targetUser = users.find((user) => user.id === targetId);
+
+  // Nếu không tìm thấy người dùng hoặc người dùng mục tiêu, trả về mã lỗi 404 và thông báo lỗi
+  if (!user || !targetUser) {
+    return res
+      .status(404)
+      .json({ error: "Either user id or target does not exist" });
+  }
+
+  // Kiểm tra xem người dùng đã theo dõi người dùng mục tiêu chưa
+  if (user.following.includes(targetId)) {
+    return res
+      .status(400)
+      .json({ error: `${userId} is already following ${targetId}` });
+  }
+
+  // Kiểm tra xem người dùng có phải là chính mình không
+  if (userId === targetId) {
+    return res
+      .status(400)
+      .json({ error: "Requesting user cannot follow themselves" });
+  }
+
+  // Thêm ID của người dùng mục tiêu vào danh sách theo dõi của người dùng
+  user.following.push(targetId);
+
+  // Trả về phản hồi thành công
+  res.json({ success: true });
+});
 
 /* This is a catch-all route that logs any requests that weren't handled above.
    Useful for seeing whether other requests are coming through correctly */
