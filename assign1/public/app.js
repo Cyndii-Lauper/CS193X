@@ -66,5 +66,4 @@ export default class App {
     return department.graduate();
   }
 
-  //TODO: Add additional methods here
 }
