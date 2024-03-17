@@ -36,6 +36,33 @@ api.all("/tests/echo", (req, res) => {
   });
 });
 
+// api.get("/users", (req, res) => {
+//   res.json({ users: ["mchang"] });
+// });
+
+// api.get("/users/mchang", (req, res) => {
+//   res.json({
+//     id: "mchang",
+//     name: "Michael",
+//     avatarURL: "images/stanford.png",
+//     following: []
+//   });
+// });
+
+// api.get("/users/mchang/feed", (req, res) => {
+//   res.json({
+//     posts: [{
+//       user: {
+//         id: "mchang",
+//         name: "Michael",
+//         avatarURL: "images/stanford.png"
+//       },
+//       time: new Date(),
+//       text: "Welcome to the Generic Social Media App!"
+//     }]
+//   });
+// });
+
 // Phương thức GET để lấy danh sách tất cả ID của người dùng
 api.get("/users", (req, res) => {
   // Lặp qua danh sách các người dùng và tạo một mảng mới chỉ chứa các ID của họ
@@ -44,15 +71,6 @@ api.get("/users", (req, res) => {
   // Trả về danh sách ID của tất cả người dùng dưới dạng JSON
   res.json({ users: userIds });
 });
-
-// api.get("/users/mchang", (req, res) => {
-//   res.json({
-//     id: "mchang",
-//     name: "Michael",
-//     avatarURL: "images/stanford.png",
-//     following: [],
-//   });
-// });
 
 // Tạo một phương thức GET để lấy hồ sơ của một người dùng dựa trên ID
 api.get("/users/:id", (req, res) => {
@@ -186,7 +204,7 @@ api.post("/users/:id/posts", (req, res) => {
     return res.status(400).json({ error: "Text property is missing or empty" });
   }
 
-  // Tìm kiếm người dùng với ID tương ứng trong danh sách users 
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
   const userIndex = users.findIndex((user) => user.id === userId);
 
   // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
@@ -262,6 +280,40 @@ api.post("/users/:id/follow", (req, res) => {
   res.json({ success: true });
 });
 
+// Phương thức PATCH để cập nhật thông tin hồ sơ của người dùng
+api.patch("/users/:id", (req, res) => {
+  const userId = req.params.id; // Lấy ID của người dùng từ URL
+  const { name, avatarURL } = req.body; // Lấy tên và URL avatar từ body của yêu cầu
+
+  // Tìm kiếm người dùng với ID tương ứng trong danh sách users
+  const userIndex = users.findIndex((user) => user.id === userId);
+
+  // Nếu không tìm thấy người dùng, trả về mã lỗi 404 và thông báo lỗi
+  if (userIndex === -1) {
+    return res.status(404).json({ error: `No user with ID ${userId}` });
+  }
+
+  // Cập nhật thông tin hồ sơ của người dùng
+  if (name !== undefined) {
+    // Nếu tên được cung cấp và không rỗng, cập nhật tên
+    users[userIndex].name = name.trim() === "" ? userId : name;
+  }
+
+  if (avatarURL !== undefined) {
+    // Nếu URL avatar được cung cấp và không rỗng, cập nhật URL avatar
+    users[userIndex].avatarURL =
+      avatarURL.trim() === "" ? "images/default.png" : avatarURL;
+  }
+
+  // Trả về thông tin hồ sơ của người dùng sau khi được cập nhật
+  res.status(200).json({
+    id: users[userIndex].id,
+    name: users[userIndex].name,
+    avatarURL: users[userIndex].avatarURL,
+    following: users[userIndex].following,
+  });
+});
+
 // Phương thức DELETE để ngừng theo dõi người dùng mục tiêu
 api.delete("/users/:id/follow", (req, res) => {
   const userId = req.params.id; // Lấy ID của người dùng từ URL
@@ -323,5 +375,3 @@ api.all("/*", (req, res) => {
 });
 
 export default initApi;
-
-// Minh

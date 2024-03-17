@@ -33,8 +33,8 @@ export default class User {
       data = await apiRequest("GET", "/users/" + id);
       console.log(data);
     } else {
-      // Tạo user mới nếu không tra cứu
-      // data = await apiRequest("POST", "/users", { id: id });
+      // Tạo user mới nếu không tra cứu ra
+      data = await apiRequest("POST", "/users", { id: id });
     }
     return new User(data);
   }

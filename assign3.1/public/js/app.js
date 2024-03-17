@@ -38,6 +38,7 @@ export default class App {
     alert(`List of users:\n\n${usersStr}`);
   }
 
+  //TODO: Add your event handlers/callback functions here
   async _onLogin(event) {
     event.preventDefault(); // ngăn chặn việc reload lại trang sau khi đăng nhập
     this._user = await User.loadOrCreate(this._loginForm.userid.value);
