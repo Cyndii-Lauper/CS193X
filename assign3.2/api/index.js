@@ -11,6 +11,8 @@ let DATABASE_URL = "mongodb://127.0.0.1";
 if (process.env.DATABASE_NAME) DATABASE_NAME = process.env.DATABASE_NAME;
 
 let api = express.Router();
+
+/* Khai báo biến users và posts để để lưu trữ các collection từ MongoDB. */
 let users;
 let posts;
 
@@ -19,18 +21,26 @@ const initApi = async (app) => {
   app.use("/api", api);
 
   //TODO: Set up database connection and collection variables
-  let conn = await MongoClient.connect(DATABASE_URL);
+  let conn = await MongoClient.connect(DATABASE_URL); // Kết nối đến MongoDB theo DATABASE_URL
   let db = conn.db(DATABASE_NAME);
+
+  // Lưu trữ các collection vào biến users và posts
   users = db.collection("users");
   posts = db.collection("posts");
 };
 
+// Middleware to enable CORS and JSON parsing
 api.use(bodyParser.json());
 api.use(cors());
 
+// GET: /api - Trả về số lượng users và post có trong database.
 api.get("/", async (req, res) => {
+
+  // Sử dụng hàm find() để lấy tất cả các document trong collection
   let usersArray = await users.find({}).toArray();
   let postsArray = await users.find({}).toArray();
+
+  // Trả về một response object
   res.json({
     db: DATABASE_NAME,
     numUsers: usersArray.length,
@@ -38,19 +48,24 @@ api.get("/", async (req, res) => {
   });
 });
 
+// GET: /api/users - Trả về một array chứa tất cả các user id.
 api.get("/users", async (req, res) => {
   let usersArray = await users.find({}).toArray();
+  // Tạo một object data chứa các user id.
   let data = { users: [] };
   for (let i of usersArray) {
-    data.users.push(i.id);
+    data.users.push(i.id); // Đẩy user id vào mảng data.users.
   }
   res.json(data);
 });
 
+// GET: /api/users/:userId/posts - Trả về một array chứa tất cả các post của user có id là :userId.
 api.get("/users/*/posts", async (req, res) => {
   let data = {
     posts: [],
   };
+
+  // Lấy userId từ url
   let userId = req.url.split("/")[2];
   let user = await users.find({ id: userId }).toArray();
   if (user.length !== 1) {
@@ -69,6 +84,7 @@ api.get("/users/*/posts", async (req, res) => {
       text: i.text,
     });
   }
+
   for (let followId of user[0].following) {
     let followUser = await users.find({ id: followId }).toArray();
     let followPostArray = await posts.find({ userId: followId }).toArray();
@@ -84,6 +100,8 @@ api.get("/users/*/posts", async (req, res) => {
       });
     }
   }
+
+  // Sắp xếp các post theo thời gian giảm dần.
   data.posts.sort((lhs, rhs) => {
     if (lhs.time > rhs.time) {
       return -1;
@@ -96,8 +114,11 @@ api.get("/users/*/posts", async (req, res) => {
   res.json(data);
 });
 
+// GET: /api/users/:userId - Trả về thông tin của user có id là :userId.
 api.get("/users/*", async (req, res) => {
   let userId = req.url.split("/")[2];
+
+  // Tìm user có id là userId trong collection users.
   let user = await users.find({ id: userId }).toArray();
   if (user.length !== 1) {
     res.status(404).json({ error: `No user with ID ${userId}` });
@@ -111,13 +132,17 @@ api.get("/users/*", async (req, res) => {
   });
 });
 
+// POST: /api/users - Tạo một user mới.
 api.post("/users", async (req, res) => {
+  // Kiểm tra xem request body.id or id = rỗng không.
   if (!req.body.id || req.body.id.length === 0) {
     res.status(400).json({
       error: "the request body is missing an id property or the id is empty",
     });
     return;
   }
+
+  //Lưu trữ id và name trong req.body vào biến newUserId và newUserName.
   let newUserId = req.body.id;
   let newUserName = req.body.name;
   let user = await users.find({ id: newUserId }).toArray();
@@ -131,11 +156,13 @@ api.post("/users", async (req, res) => {
     avatarURL: "images/default.png",
     following: [],
   };
+  // Thêm hoặc chèn một document mới vào collection users.
   await users.insertOne(data);
   delete data._id;
   res.json(data);
 });
 
+// PATCH: /api/users/:userId - Cập nhật thông tin của user có id là :userId.
 api.patch("/users/*", async (req, res) => {
   let userId = req.url.split("/")[2];
   let user = await users.find({ id: userId }).toArray();
@@ -149,6 +176,7 @@ api.patch("/users/*", async (req, res) => {
     if (newName.length == 0) {
       newName = userId;
     }
+    // Cập nhật thông tin của user.
     await users.updateOne({ id: userId }, { $set: { name: newName } });
   }
   if (newAvatarURL) {
@@ -160,11 +188,13 @@ api.patch("/users/*", async (req, res) => {
       { $set: { avatarURL: newAvatarURL } },
     );
   }
+  // Truy vấn thông tin của user sau khi cập nhật.
   user = await users.find({ id: userId }).toArray();
   delete user[0]._id;
   res.json(user[0]);
 });
 
+// POST: /api/users/:userId/feed - Tạo một post mới cho user có id là :userId.
 api.post("/users/*/feed", async (req, res) => {
   let userId = req.url.split("/")[2];
   let user = await users.find({ id: userId }).toArray();
@@ -179,6 +209,7 @@ api.post("/users/*/feed", async (req, res) => {
     });
     return;
   }
+  // Thêm một post mới vào collection posts.
   await posts.insertOne({
     userId: userId,
     time: new Date(),
@@ -187,9 +218,12 @@ api.post("/users/*/feed", async (req, res) => {
   res.json({ success: true });
 });
 
+// POST: /api/users/:userId/follow - User có id là :userId theo dõi user có id là :target.
 api.post("/users/*/follow", async (req, res) => {
   let userId = req.url.split("/")[2];
   let user = await users.find({ id: userId }).toArray();
+
+  // Lấy targetId từ query string.
   let targetId = req.query.target;
   if (!targetId || targetId.length === 0) {
     res.status(400).json({
@@ -198,6 +232,7 @@ api.post("/users/*/follow", async (req, res) => {
     });
     return;
   }
+  // Tìm user có id = targetId trong collection users.
   let targetUser = await users.find({ id: targetId }).toArray();
   if (userId === targetId) {
     res.status(400).json({ error: "user is the same as the target" });
@@ -207,6 +242,7 @@ api.post("/users/*/follow", async (req, res) => {
     res.status(404).json({ error: "user id or target does not exist" });
     return;
   }
+  // Kiểm tra xem user có đang theo dõi target hay không.
   let flag = false;
   let following = user[0].following;
   following.forEach((element) => {
@@ -225,6 +261,7 @@ api.post("/users/*/follow", async (req, res) => {
   res.json({ success: true });
 });
 
+// DELETE: /api/users/:userId/follow - User có id là :userId bỏ theo dõi user có id là :target.
 api.delete("/users/*/follow", async (req, res) => {
   let userId = req.url.split("/")[2];
   let user = await users.find({ id: userId }).toArray();
