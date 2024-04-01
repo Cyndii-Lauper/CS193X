@@ -31,6 +31,8 @@ export class HTTPError extends Error {
    The API is assumed to return JSON. If the response status is 200, the response body (as a JS object) is returned.
    If the response has any other status, an HTTPError is thrown, with its status set to the response status and its
    message set to the value of the `error` property of the response, which we assume is a user-facing error message. */
+
+// Hàm này sẽ gửi request đến server với method, path và body được truyền vào.
 const apiRequest = async (method, path, body = null) => {
   let uri = API_URL + path;
   let url = "http://localhost:1930" + uri;
