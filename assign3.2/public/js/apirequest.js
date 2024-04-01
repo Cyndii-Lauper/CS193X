@@ -34,10 +34,12 @@ export class HTTPError extends Error {
 
 // Hàm này sẽ gửi request đến server với method, path và body được truyền vào.
 const apiRequest = async (method, path, body = null) => {
+  // Tạo URL từ API_URL và path.
   let uri = API_URL + path;
   let url = "http://localhost:1930" + uri;
   let headers = {};
 
+  // Nếu body không rỗng thì chuyển thành JSON và set Content-Type là application/json.
   if (body) {
     body = JSON.stringify(body);
     headers["Content-Type"] = "application/json";
