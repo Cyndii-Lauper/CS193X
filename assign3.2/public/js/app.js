@@ -49,6 +49,7 @@ export default class App {
     }
   }
 
+  //TODO: Add your event handlers/callback functions here
   async _onPost(event) {
     event.preventDefault();
     await this._user.makePost(this._postForm.querySelector("#newPost").value);
