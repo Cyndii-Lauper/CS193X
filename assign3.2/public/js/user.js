@@ -16,7 +16,7 @@ export default class User {
   /* Returns an array of user IDs. */
   static async listUsers() {
     let data = await apiRequest("GET", "/users");
-    console.table(data);
+    console.log(data);
     return data.users;
   }
 
@@ -31,7 +31,7 @@ export default class User {
       })
     ) {
       data = await apiRequest("GET", "/users/" + id);
-      console.table(data);
+      console.log(data);
     } else {
       // Tạo user mới nếu không tra cứu ra
       data = await apiRequest("POST", "/users", { id: id });

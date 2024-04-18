@@ -1,0 +1,4 @@
+db = connect("cs193x_assign3");
+db.dropDatabase();
+db.users.insertOne({ id: "mchang", name: "Michael", avatarURL: "images/stanford.png", following: [] });
+db.posts.insertOne({ userId: "mchang", time: new Date(), text: "Welcome to the Generic Social Media App!" });
